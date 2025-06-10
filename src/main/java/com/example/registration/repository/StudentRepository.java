@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 // Student - this repository manages the Student entity
-// Long - the primary key of the Student entity (studentID)
+// Integer - the primary key of the Student entity (studentID)
 @Repository
-public interface StudentRepository extends JpaRepository<Student, Long> {}
+public interface StudentRepository extends JpaRepository<Student, Integer> {}

@@ -26,7 +26,7 @@ public class CourseService {
     }
 
     // Finding course by id
-    public Course getCourseById(Long id) {
+    public Course getCourseById(Integer id) {
         return courseRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found with id: " + id));
     }
@@ -37,7 +37,7 @@ public class CourseService {
     }
 
     // Update a course, changing the title and description both in Course and Registration tables
-    public Course updateCourse(Long id, Course updatedCourseDetails) {
+    public Course updateCourse(Integer id, Course updatedCourseDetails) {
         Course course = getCourseById(id);
         course.setTitle(updatedCourseDetails.getTitle());
         course.setDescription(updatedCourseDetails.getDescription());
@@ -45,7 +45,7 @@ public class CourseService {
     }
 
     // Delete a course by id
-    public void deleteCourse(Long id) {
+    public void deleteCourse(Integer id) {
 
         // course must exist
         if (!courseRepo.existsById(id)) {

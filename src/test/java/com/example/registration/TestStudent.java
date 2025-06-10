@@ -7,7 +7,6 @@ import com.example.registration.repository.CourseRepository;
 import com.example.registration.repository.RegistrationRepository;
 import com.example.registration.repository.StudentRepository;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,7 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -42,7 +44,6 @@ public class TestStudent {
 
 
     // removes all data before and after testing
-    @BeforeEach
     @AfterEach
     public void deleteAllData() {
         registrationRepository.deleteAll();
@@ -54,7 +55,7 @@ public class TestStudent {
     // creating a student test and checking the response
     @Test
     @DisplayName("POST /api/students - Create a new student")
-    public void createStudentResponse() {
+    public void createStudent() {
         // create new student object
         Student newStudent = new Student();
 
@@ -235,7 +236,7 @@ public class TestStudent {
                 Void.class
         );
 
-        // the response should be 409 CONFLICT
+        // the response should be 409 conflict
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         assertTrue(studentRepository.existsById(student.getId()));
     }

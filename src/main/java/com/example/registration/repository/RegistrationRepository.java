@@ -10,8 +10,8 @@ import java.util.List;
 
 @Repository
 // Registration - this repository manages the Registration entity
-// Long - the primary key of the Registration entity (registrationID)
-public interface RegistrationRepository extends JpaRepository<Registration, Long> { //
+// Integer - the primary key of the Registration entity (registrationID)
+public interface RegistrationRepository extends JpaRepository<Registration, Integer> { //
 
 
     // find all registrations associated with Student object
@@ -20,7 +20,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     List<Registration> findByCourse(Course course);   //
 
     // method to check if a registration exists based on student ID
-    boolean existsByStudentId(Long studentId);
+    boolean existsByStudentId(Integer studentId);
     // method to check if a registration exists based on course ID
-    boolean existsByCourseId(Long courseId);
+    boolean existsByCourseId(Integer courseId);
 }

@@ -26,7 +26,7 @@ public class StudentService {
     }
 
     // Get student by id
-    public Student getStudentById(Long id) {
+    public Student getStudentById(Integer id) {
         return studentRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found with id: " + id));
     }
@@ -38,7 +38,7 @@ public class StudentService {
 
 
     // Update a student, changing the name and email both in Student and Registration tables
-    public Student updateStudent(Long id, Student updatedStudentDetails) {
+    public Student updateStudent(Integer id, Student updatedStudentDetails) {
         Student student = getStudentById(id);
         student.setName(updatedStudentDetails.getName());
         student.setEmail(updatedStudentDetails.getEmail());
@@ -46,7 +46,7 @@ public class StudentService {
     }
 
     // Delete a student by id
-    public void deleteStudent(Long id) {
+    public void deleteStudent(Integer id) {
 
         // student must exist
         if (!studentRepo.existsById(id)) {

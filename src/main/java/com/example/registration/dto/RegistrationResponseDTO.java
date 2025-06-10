@@ -5,10 +5,10 @@ import com.example.registration.model.Registration;
 
 public class RegistrationResponseDTO {
 
-    private Long registrationID;
-    private Long studentId;
+    private Integer registrationID;
+    private Integer studentId;
     private String studentName;
-    private Long courseId;
+    private Integer courseId;
     private String courseTitle;
 
 
@@ -26,11 +26,11 @@ public class RegistrationResponseDTO {
 
 
 
-    public Long getRegistrationID() {
+    public Integer getRegistrationID() {
         return registrationID;
     }
 
-    public Long getStudentId() {
+    public Integer getStudentId() {
         return studentId;
     }
 
@@ -38,7 +38,7 @@ public class RegistrationResponseDTO {
         return studentName;
     }
 
-    public Long getCourseId() {
+    public Integer getCourseId() {
         return courseId;
     }
 
@@ -46,11 +46,11 @@ public class RegistrationResponseDTO {
         return courseTitle;
     }
 
-    public void setRegistrationID(Long registrationID) {
+    public void setRegistrationID(Integer registrationID) {
         this.registrationID = registrationID;
     }
 
-    public void setStudentId(Long studentId) {
+    public void setStudentId(Integer studentId) {
         this.studentId = studentId;
     }
 
@@ -58,7 +58,7 @@ public class RegistrationResponseDTO {
         this.studentName = studentName;
     }
 
-    public void setCourseId(Long courseId) {
+    public void setCourseId(Integer courseId) {
         this.courseId = courseId;
     }
 

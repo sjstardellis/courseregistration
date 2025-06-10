@@ -10,7 +10,7 @@ public class Registration {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "registrationID")
-    private Long registrationID;
+    private Integer registrationID;
 
     // taken from student table
     @Column(name = "student_name")
@@ -35,7 +35,7 @@ public class Registration {
     private Course course;
 
     // getters
-    public Long getRegistrationID() {
+    public Integer getRegistrationID() {
         return registrationID;
     }
 
@@ -60,7 +60,7 @@ public class Registration {
     }
 
     // setters
-    public void setRegistrationID(Long registrationID) {
+    public void setRegistrationID(Integer registrationID) {
         this.registrationID = registrationID;
     }
 

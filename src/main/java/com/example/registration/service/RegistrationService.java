@@ -66,14 +66,14 @@ public class RegistrationService {
     }
 
     // Gets registration by id
-    public RegistrationResponseDTO getRegistrationById(Long id) {
+    public RegistrationResponseDTO getRegistrationById(Integer id) {
         Registration registration = registrationRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Registration not found with id: " + id));
         return new RegistrationResponseDTO(registration);
     }
 
     // Delete registration by id
-    public void deleteRegistration(Long id) {
+    public void deleteRegistration(Integer id) {
 
         // registration must exist
         if (!registrationRepo.existsById(id)) {

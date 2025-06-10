@@ -31,19 +31,19 @@ public class CourseController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Course> getCourseById(@PathVariable Long id) {
+    public ResponseEntity<Course> getCourseById(@PathVariable Integer id) {
         Course course = courseService.getCourseById(id);
         return ResponseEntity.ok(course);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Course> updateCourse(@PathVariable Long id, @RequestBody Course courseDetails) {
+    public ResponseEntity<Course> updateCourse(@PathVariable Integer id, @RequestBody Course courseDetails) {
         Course updatedCourse = courseService.updateCourse(id, courseDetails);
         return ResponseEntity.ok(updatedCourse);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCourse(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteCourse(@PathVariable Integer id) {
         courseService.deleteCourse(id);
         return ResponseEntity.noContent().build();
     }

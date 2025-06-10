@@ -11,12 +11,12 @@ public class Course {
     // table attributes
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     private String title;
     private String description;
 
     // getters
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -29,7 +29,7 @@ public class Course {
     }
 
     // setters
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

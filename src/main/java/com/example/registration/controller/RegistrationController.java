@@ -30,13 +30,13 @@ public class RegistrationController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RegistrationResponseDTO> getRegistrationById(@PathVariable Long id) {
+    public ResponseEntity<RegistrationResponseDTO> getRegistrationById(@PathVariable Integer id) {
         RegistrationResponseDTO responseDto = registrationService.getRegistrationById(id);
         return ResponseEntity.ok(responseDto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRegistration(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteRegistration(@PathVariable Integer id) {
         registrationService.deleteRegistration(id);
         return ResponseEntity.noContent().build();
     }
