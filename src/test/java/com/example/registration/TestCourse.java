@@ -151,7 +151,7 @@ public class TestCourse {
     }
 
     @Test
-    @DisplayName("DELETE /api/courses/{id} - Should return 409 CONFLICT if registered")
+    @DisplayName("DELETE /api/courses/{id} - Return 409 if the user is registered for a course")
     void deleteCourse_Registered() {
         // create a student and a course
         Student student = studentRepository.save(new Student());
