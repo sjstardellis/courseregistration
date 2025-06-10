@@ -11,13 +11,13 @@ public class Course {
     // table attributes
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Integer course_id;
     private String title;
     private String description;
 
     // getters
     public Integer getId() {
-        return id;
+        return course_id;
     }
 
     public String getTitle() {
@@ -29,8 +29,8 @@ public class Course {
     }
 
     // setters
-    public void setId(Integer id) {
-        this.id = id;
+    public void setId(Integer course_id) {
+        this.course_id = course_id;
     }
 
     public void setTitle(String title) {

@@ -14,14 +14,14 @@ public class Student {
     // table attributes
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Integer student_id;
     private String name;
     private String email;
 
 
     // getters
     public Integer getId() {
-        return id;
+        return student_id;
     }
 
     public String getName() {
@@ -33,8 +33,8 @@ public class Student {
     }
 
     // setters
-    public void setId(Integer id) {
-        this.id = id;
+    public void setId(Integer student_id) {
+        this.student_id = student_id;
     }
 
     public void setName(String name) {

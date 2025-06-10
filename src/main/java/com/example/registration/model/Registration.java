@@ -22,7 +22,7 @@ public class Registration {
 
     // taken from student table
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id", referencedColumnName = "id")
+    @JoinColumn(name = "student_id", referencedColumnName = "student_id")
     private Student student;
 
     // taken from course table
@@ -31,7 +31,7 @@ public class Registration {
 
     // taken from course table
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id", referencedColumnName = "id")
+    @JoinColumn(name = "course_id", referencedColumnName = "course_id")
     private Course course;
 
     // getters
