@@ -9,8 +9,8 @@ public class Registration {
     // table attributes
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "registrationID")
-    private Integer registrationID;
+    @Column(name = "registration_id")
+    private Integer registration_id;
 
     // taken from student table
     @Column(name = "student_name")
@@ -36,7 +36,7 @@ public class Registration {
 
     // getters
     public Integer getRegistrationID() {
-        return registrationID;
+        return registration_id;
     }
 
     public String getStudentName() {
@@ -61,7 +61,7 @@ public class Registration {
 
     // setters
     public void setRegistrationID(Integer registrationID) {
-        this.registrationID = registrationID;
+        this.registration_id = registrationID;
     }
 
     public void setStudentName(String studentName) {

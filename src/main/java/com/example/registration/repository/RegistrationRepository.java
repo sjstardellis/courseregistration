@@ -6,6 +6,7 @@ import com.example.registration.model.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -23,4 +24,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, Inte
     boolean existsByStudentId(Integer studentId);
     // method to check if a registration exists based on course ID
     boolean existsByCourseId(Integer courseId);
+
+    // method to find student by their id and return a list of their registrations
+    List<Registration> findByStudentId(Integer studentId);
 }

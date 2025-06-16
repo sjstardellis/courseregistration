@@ -10,6 +10,7 @@ import com.example.registration.repository.StudentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -61,6 +62,19 @@ public class RegistrationService {
     // Gets all registrations
     public List<RegistrationResponseDTO> getAllRegistrations() {
         return registrationRepo.findAll().stream()
+                .map(RegistrationResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    // Get all registrations by student id
+    public List<RegistrationResponseDTO> getAllRegistrationsByStudentId(Integer studentId) {
+        // check if a student exists
+        if (!studentRepo.existsById(studentId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found with id: " + studentId);
+        }
+
+        // fetch the registrations by the student id and create a list of DTOs as the response
+        return registrationRepo.findByStudentId(studentId).stream()
                 .map(RegistrationResponseDTO::new)
                 .collect(Collectors.toList());
     }

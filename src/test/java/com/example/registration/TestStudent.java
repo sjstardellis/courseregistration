@@ -7,6 +7,7 @@ import com.example.registration.repository.CourseRepository;
 import com.example.registration.repository.RegistrationRepository;
 import com.example.registration.repository.StudentRepository;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -33,6 +34,9 @@ public class TestStudent {
     @Autowired
     private TestRestTemplate restTemplate;
 
+    // This template will be configured with basic auth credentials
+    private TestRestTemplate authenticatedRestTemplate;
+
     @Autowired
     private StudentRepository studentRepository;
 
@@ -41,6 +45,22 @@ public class TestStudent {
 
     @Autowired
     private RegistrationRepository registrationRepository;
+
+    // Setup an authenticated user before each test
+    @BeforeEach
+    void setupAuthenticatedUser() {
+        // Create a student with a known password to be used for authentication
+        Student authUser = new Student();
+        authUser.setName("Auth User");
+        authUser.setEmail("auth.user@example.com");
+        authUser.setPassword("password123"); // Set a plain text password
+
+        // Use the public endpoint to create the user, which also handles password encoding
+        restTemplate.postForEntity("/api/students", authUser, Student.class);
+
+        // Configure a new TestRestTemplate with basic auth credentials
+        authenticatedRestTemplate = restTemplate.withBasicAuth("auth.user@example.com", "password123");
+    }
 
 
     // removes all data before and after testing
@@ -52,20 +72,18 @@ public class TestStudent {
     }
 
 
-    // creating a student test and checking the response
+    // This endpoint is public, so it doesn't need authentication.
     @Test
     @DisplayName("POST /api/students - Create a new student")
     public void createStudent() {
-        // create new student object
         Student newStudent = new Student();
-
         newStudent.setName("Test Student");
         newStudent.setEmail("test@example.com");
+        newStudent.setPassword("password");
 
-        // a post request is made to create the student
+        // Use the unauthenticated restTemplate since this endpoint is permitted for all
         ResponseEntity<Student> response = restTemplate.postForEntity("/api/students", newStudent, Student.class);
 
-        // the response created should be with the student's data
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
         assertNotNull(response.getBody().getId());
@@ -75,26 +93,24 @@ public class TestStudent {
 
     private static Stream<Arguments> createMultipleStudents() {
         return Stream.of(
-                Arguments.of("Jane Smith", "jane.smith@example.com"),
-                Arguments.of("Peter Jones", "peter.jones@example.com"),
-                Arguments.of("Mary Brown", "mary.brown@example.com")
+                Arguments.of("Jane Smith", "jane.smith@example.com", "pass1"),
+                Arguments.of("Peter Jones", "peter.jones@example.com", "pass2"),
+                Arguments.of("Mary Brown", "mary.brown@example.com", "pass3")
         );
     }
 
     @ParameterizedTest
     @MethodSource("createMultipleStudents")
     @DisplayName("POST /api/students - Create multiple new students")
-    public void createMultipleStudents(String name, String email) {
-
-        // create a new student based on the arguments from the stream
+    public void createMultipleStudents(String name, String email, String password) {
         Student newStudent = new Student();
         newStudent.setName(name);
         newStudent.setEmail(email);
+        newStudent.setPassword(password);
 
-        // a post request is made to create the student
+        // Use the unauthenticated restTemplate for the public creation endpoint
         ResponseEntity<Student> response = restTemplate.postForEntity("/api/students", newStudent, Student.class);
 
-        // assertEquals each of the students created from the stream
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(name, response.getBody().getName());
@@ -104,57 +120,42 @@ public class TestStudent {
     @Test
     @DisplayName("GET /api/students/{id} - Return a student")
     void getStudentByID() {
+        Student student = studentRepository.findByEmail("auth.user@example.com").orElseThrow();
 
-        // have an existing student in the database
-        Student student = new Student();
-        student.setName("Test Student");
-        student.setEmail("test@example.com");
-        student = studentRepository.save(student);
+        // Use the authenticated template to access a protected endpoint
+        ResponseEntity<Student> response = authenticatedRestTemplate.getForEntity("/api/students/" + student.getId(), Student.class);
 
-        // get a student
-        ResponseEntity<Student> response = restTemplate.getForEntity("/api/students/" + student.getId(), Student.class);
-
-        // should return ok with the correct student
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        // not null check
         assertNotNull(response.getBody());
-        // comparing the IDs of the student in the database and the student in the response
         assertEquals(student.getId(), response.getBody().getId());
     }
 
     @Test
     @DisplayName("GET /api/students/{id} - Return 404")
     void getStudentByInvalidID() {
-        // get a student based on a non-existent ID
-        ResponseEntity<Student> response = restTemplate.getForEntity("/api/students/-1", Student.class);
-
-        // should return 404
+        // Use the authenticated template to access a protected endpoint
+        ResponseEntity<Student> response = authenticatedRestTemplate.getForEntity("/api/students/-1", Student.class);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
     @Test
     @DisplayName("GET /api/students - Return all students")
     void getAllStudents() {
-        // save multiple students to the database
-        Student student1 = new Student();
-        student1.setName("John");
-        student1.setEmail("john@example.com");
-        studentRepository.save(student1);
-
+        // The auth user is already created, let's add one more
         Student student2 = new Student();
         student2.setName("Ben");
         student2.setEmail("ben@example.com");
+        student2.setPassword("password");
         studentRepository.save(student2);
 
-        // fetch all students
-        ResponseEntity<List<Student>> response = restTemplate.exchange(
+        // Use the authenticated template to fetch all students
+        ResponseEntity<List<Student>> response = authenticatedRestTemplate.exchange(
                 "/api/students",
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<>() {}
         );
 
-        // should retrieve a list of all students of size 2, not null
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(2, response.getBody().size());
@@ -163,54 +164,44 @@ public class TestStudent {
     @Test
     @DisplayName("PUT /api/students/{id} - Update an existing student")
     void updateStudentByID() {
-        // create a student
-        Student student = new Student();
-        student.setName("Test1");
-        student.setEmail("test1@example.com");
-        student = studentRepository.save(student);
+        Student student = studentRepository.findByEmail("auth.user@example.com").orElseThrow();
 
-        // update the student details with
         Student updatedDetails = new Student();
-        updatedDetails.setName("Test2");
-        updatedDetails.setEmail("test2@example.com");
+        updatedDetails.setName("Updated Name");
+        updatedDetails.setEmail("updated.email@example.com");
 
-        // put request initiated with updatedDetails of the student
         HttpEntity<Student> requestEntity = new HttpEntity<>(updatedDetails);
 
-        // completes request
-        ResponseEntity<Student> response = restTemplate.exchange("/api/students/" + student.getId(),
+        // Use the authenticated template to update the student
+        ResponseEntity<Student> response = authenticatedRestTemplate.exchange("/api/students/" + student.getId(),
                 HttpMethod.PUT,
                 requestEntity,
                 Student.class
         );
 
-        // ensure the response is updated properly
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("Test2", response.getBody().getName());
-        assertEquals("test2@example.com", response.getBody().getEmail());
+        assertEquals("Updated Name", response.getBody().getName());
+        assertEquals("updated.email@example.com", response.getBody().getEmail());
     }
 
     @Test
     @DisplayName("DELETE /api/students/{id} - Delete a student")
     public void deleteStudent() {
-        // create a new student
         Student student = new Student();
         student.setName("Deleted Student");
         student.setEmail("delete@example.com");
-
-        // save student
+        student.setPassword("password");
         student = studentRepository.save(student);
 
-        // delete request for the student that we just created
-        ResponseEntity<Void> response = restTemplate.exchange(
+        // Use the authenticated template to perform the delete operation
+        ResponseEntity<Void> response = authenticatedRestTemplate.exchange(
                 "/api/students/" + student.getId(),
                 HttpMethod.DELETE,
                 null,
                 Void.class
         );
 
-        // should return 204 no content
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         assertFalse(studentRepository.existsById(student.getId()));
     }
@@ -218,25 +209,22 @@ public class TestStudent {
     @Test
     @DisplayName("DELETE /api/students/{id} - Return 409 if the user is registered for a course")
     void deleteStudent_Registered() {
-        // create a student and a course
-        Student student = studentRepository.save(new Student());
+        Student student = studentRepository.findByEmail("auth.user@example.com").orElseThrow();
         Course course = courseRepository.save(new Course());
 
-        // set the student and course tied to the registration
         Registration registration = new Registration();
         registration.setStudent(student);
         registration.setCourse(course);
         registrationRepository.save(registration);
 
-        // try to delete the student while they are registered for a course
-        ResponseEntity<Void> response = restTemplate.exchange(
+        // Use the authenticated template to try to delete the student
+        ResponseEntity<Void> response = authenticatedRestTemplate.exchange(
                 "/api/students/" + student.getId(),
                 HttpMethod.DELETE,
                 null,
                 Void.class
         );
 
-        // the response should be 409 conflict
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         assertTrue(studentRepository.existsById(student.getId()));
     }

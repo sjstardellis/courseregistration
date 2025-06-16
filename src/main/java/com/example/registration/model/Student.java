@@ -17,6 +17,7 @@ public class Student {
     private Integer student_id;
     private String name;
     private String email;
+    private String password;
 
 
     // getters
@@ -32,6 +33,10 @@ public class Student {
         return email;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
     // setters
     public void setId(Integer student_id) {
         this.student_id = student_id;
@@ -44,4 +49,6 @@ public class Student {
     public void setEmail(String email) {
         this.email = email;
     }
+
+    public void setPassword(String password) { this.password = password; }
 }

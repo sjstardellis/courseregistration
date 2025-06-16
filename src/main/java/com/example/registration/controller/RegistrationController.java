@@ -29,6 +29,13 @@ public class RegistrationController {
         return registrationService.getAllRegistrations();
     }
 
+
+    @GetMapping("/studentid/{id}")
+    public List<RegistrationResponseDTO> getAllRegistrationsByStudentId(@PathVariable Integer id) {
+        return registrationService.getAllRegistrationsByStudentId(id);
+    }
+
+
     @GetMapping("/{id}")
     public ResponseEntity<RegistrationResponseDTO> getRegistrationById(@PathVariable Integer id) {
         RegistrationResponseDTO responseDto = registrationService.getRegistrationById(id);
