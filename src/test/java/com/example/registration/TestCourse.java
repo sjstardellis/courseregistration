@@ -26,8 +26,7 @@ public class TestCourse {
     @Autowired
     private TestRestTemplate restTemplate;
 
-    // Authenticated client for accessing protected endpoints
-    private TestRestTemplate authenticatedRestTemplate;
+    private TestRestTemplate authenticationTemplate;
 
     @Autowired
     private CourseRepository courseRepository;
@@ -40,17 +39,16 @@ public class TestCourse {
 
     @BeforeEach
     void setupAuthenticatedUser() {
-        // Create a student to authenticate with
         Student authUser = new Student();
-        authUser.setName("Auth User");
-        authUser.setEmail("auth.user@example.com");
-        authUser.setPassword("password123");
+        authUser.setName("TestStudent");
+        authUser.setEmail("TestStudentEmail@gmail.com");
+        authUser.setPassword("password");
 
-        // Use the public endpoint to create the user, which also handles password encoding
+
+        // this endpoint is public, no authentication
         restTemplate.postForEntity("/api/students", authUser, Student.class);
 
-        // Configure TestRestTemplate with basic auth credentials
-        authenticatedRestTemplate = restTemplate.withBasicAuth("auth.user@example.com", "password123");
+        authenticationTemplate = restTemplate.withBasicAuth("TestStudentEmail@gmail.com", "password");
     }
 
     @AfterEach
@@ -67,8 +65,7 @@ public class TestCourse {
         newCourse.setTitle("Intro to Spring Boot");
         newCourse.setDescription("A course on how Spring Boot works.");
 
-        // Use the authenticated client
-        ResponseEntity<Course> response = authenticatedRestTemplate.postForEntity("/api/courses", newCourse, Course.class);
+        ResponseEntity<Course> response = authenticationTemplate.postForEntity("/api/courses", newCourse, Course.class);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -82,8 +79,7 @@ public class TestCourse {
         course.setTitle("Test Course");
         course = courseRepository.save(course);
 
-        // Use the authenticated client
-        ResponseEntity<Course> response = authenticatedRestTemplate.getForEntity("/api/courses/" + course.getId(), Course.class);
+        ResponseEntity<Course> response = authenticationTemplate.getForEntity("/api/courses/" + course.getId(), Course.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -96,8 +92,7 @@ public class TestCourse {
         courseRepository.save(new Course());
         courseRepository.save(new Course());
 
-        // Use the authenticated client
-        ResponseEntity<List<Course>> response = authenticatedRestTemplate.exchange(
+        ResponseEntity<List<Course>> response = authenticationTemplate.exchange(
                 "/api/courses",
                 HttpMethod.GET,
                 null,
@@ -121,8 +116,7 @@ public class TestCourse {
 
         HttpEntity<Course> requestEntity = new HttpEntity<>(updatedDetails);
 
-        // Use the authenticated client
-        ResponseEntity<Course> response = authenticatedRestTemplate.exchange(
+        ResponseEntity<Course> response = authenticationTemplate.exchange(
                 "/api/courses/" + course.getId(),
                 HttpMethod.PUT,
                 requestEntity,
@@ -135,12 +129,11 @@ public class TestCourse {
     }
 
     @Test
-    @DisplayName("DELETE /api/courses/{id} - Should delete a course")
+    @DisplayName("DELETE /api/courses/{id} - Delete an existing course")
     void deleteCourse() {
         Course course = courseRepository.save(new Course());
 
-        // Use the authenticated client
-        ResponseEntity<Void> response = authenticatedRestTemplate.exchange(
+        ResponseEntity<Void> response = authenticationTemplate.exchange(
                 "/api/courses/" + course.getId(),
                 HttpMethod.DELETE,
                 null,
@@ -154,8 +147,7 @@ public class TestCourse {
     @Test
     @DisplayName("DELETE /api/courses/{id} - Return 409 if the user is registered for a course")
     void deleteCourse_Registered() {
-        // Find the auth user created in @BeforeEach
-        Student student = studentRepository.findByEmail("auth.user@example.com").orElseThrow();
+        Student student = studentRepository.findByEmail("TestStudentEmail@gmail.com").orElseThrow();
         Course course = courseRepository.save(new Course());
 
         Registration registration = new Registration();
@@ -163,8 +155,7 @@ public class TestCourse {
         registration.setCourse(course);
         registrationRepository.save(registration);
 
-        // Use the authenticated client
-        ResponseEntity<Void> response = authenticatedRestTemplate.exchange(
+        ResponseEntity<Void> response = authenticationTemplate.exchange(
                 "/api/courses/" + course.getId(),
                 HttpMethod.DELETE,
                 null,

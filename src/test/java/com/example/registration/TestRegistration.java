@@ -28,8 +28,7 @@ public class TestRegistration {
     @Autowired
     private TestRestTemplate restTemplate;
 
-    // Authenticated client for accessing protected endpoints
-    private TestRestTemplate authenticatedRestTemplate;
+    private TestRestTemplate authenticationTemplate;
 
     @Autowired
     private StudentRepository studentRepository;
@@ -42,17 +41,15 @@ public class TestRegistration {
 
     @BeforeEach
     void setupAuthenticatedUser() {
-        // Create a student to authenticate with
         Student authUser = new Student();
-        authUser.setName("Auth User");
-        authUser.setEmail("auth.user@example.com");
-        authUser.setPassword("password123");
+        authUser.setName("TestStudent");
+        authUser.setEmail("TestStudentEmail@gmail.com");
+        authUser.setPassword("password");
 
-        // Use the public endpoint to create the user, which also handles password encoding
+        // this endpoint is public, no authentication
         restTemplate.postForEntity("/api/students", authUser, Student.class);
 
-        // Configure TestRestTemplate with basic auth credentials
-        authenticatedRestTemplate = restTemplate.withBasicAuth("auth.user@example.com", "password123");
+        authenticationTemplate = restTemplate.withBasicAuth("TestStudentEmail@gmail.com", "password");
     }
 
     @AfterEach
@@ -78,8 +75,7 @@ public class TestRegistration {
         requestDto.setStudentId(student.getId());
         requestDto.setCourseId(course.getId());
 
-        // Use the authenticated client
-        ResponseEntity<RegistrationResponseDTO> response = authenticatedRestTemplate.postForEntity("/api/registrations", requestDto, RegistrationResponseDTO.class);
+        ResponseEntity<RegistrationResponseDTO> response = authenticationTemplate.postForEntity("/api/registrations", requestDto, RegistrationResponseDTO.class);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -97,12 +93,10 @@ public class TestRegistration {
         createDto.setStudentId(student.getId());
         createDto.setCourseId(course.getId());
 
-        // Use the authenticated client to create the registration
-        ResponseEntity<RegistrationResponseDTO> createdResponse = authenticatedRestTemplate.postForEntity("/api/registrations", createDto, RegistrationResponseDTO.class);
+        ResponseEntity<RegistrationResponseDTO> createdResponse = authenticationTemplate.postForEntity("/api/registrations", createDto, RegistrationResponseDTO.class);
         Integer registrationId = createdResponse.getBody().getRegistrationID();
 
-        // Use the authenticated client to get the registration
-        ResponseEntity<RegistrationResponseDTO> response = authenticatedRestTemplate.getForEntity("/api/registrations/" + registrationId, RegistrationResponseDTO.class);
+        ResponseEntity<RegistrationResponseDTO> response = authenticationTemplate.getForEntity("/api/registrations/" + registrationId, RegistrationResponseDTO.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -119,15 +113,14 @@ public class TestRegistration {
         RegistrationResponseDTO DTO1 = new RegistrationResponseDTO();
         DTO1.setStudentId(student.getId());
         DTO1.setCourseId(course1.getId());
-        authenticatedRestTemplate.postForEntity("/api/registrations", DTO1, RegistrationResponseDTO.class);
+        authenticationTemplate.postForEntity("/api/registrations", DTO1, RegistrationResponseDTO.class);
 
         RegistrationResponseDTO DTO2 = new RegistrationResponseDTO();
         DTO2.setStudentId(student.getId());
         DTO2.setCourseId(course2.getId());
-        authenticatedRestTemplate.postForEntity("/api/registrations", DTO2, RegistrationResponseDTO.class);
+        authenticationTemplate.postForEntity("/api/registrations", DTO2, RegistrationResponseDTO.class);
 
-        // Use the authenticated client
-        ResponseEntity<List<RegistrationResponseDTO>> response = authenticatedRestTemplate.exchange(
+        ResponseEntity<List<RegistrationResponseDTO>> response = authenticationTemplate.exchange(
                 "/api/registrations",
                 HttpMethod.GET,
                 null,
@@ -140,7 +133,7 @@ public class TestRegistration {
     }
 
     @Test
-    @DisplayName("DELETE /api/registrations/{id} - Should delete a registration")
+    @DisplayName("DELETE /api/registrations/{id} - Delete a registration")
     void deleteRegistration_shouldReturnNoContent() {
         Student student = studentRepository.save(new Student());
         Course course = courseRepository.save(new Course());
@@ -148,11 +141,10 @@ public class TestRegistration {
         createDto.setStudentId(student.getId());
         createDto.setCourseId(course.getId());
 
-        ResponseEntity<RegistrationResponseDTO> createdResponse = authenticatedRestTemplate.postForEntity("/api/registrations", createDto, RegistrationResponseDTO.class);
+        ResponseEntity<RegistrationResponseDTO> createdResponse = authenticationTemplate.postForEntity("/api/registrations", createDto, RegistrationResponseDTO.class);
         Integer registrationID = createdResponse.getBody().getRegistrationID();
 
-        // Use the authenticated client
-        ResponseEntity<Void> response = authenticatedRestTemplate.exchange(
+        ResponseEntity<Void> response = authenticationTemplate.exchange(
                 "/api/registrations/" + registrationID,
                 HttpMethod.DELETE,
                 null,
@@ -171,10 +163,8 @@ public class TestRegistration {
         student1.setPassword("pass1");
         student1 = studentRepository.save(student1);
 
-        // ... (rest of the test remains the same as it uses the authenticated client)
 
-        // Use the authenticated client
-        ResponseEntity<List<RegistrationResponseDTO>> response = authenticatedRestTemplate.exchange(
+        ResponseEntity<List<RegistrationResponseDTO>> response = authenticationTemplate.exchange(
                 "/api/registrations/studentid/" + student1.getId(),
                 HttpMethod.GET,
                 null,
@@ -184,22 +174,20 @@ public class TestRegistration {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         List<RegistrationResponseDTO> registrations = response.getBody();
         assertNotNull(registrations);
-        assertEquals(0, registrations.size()); // This will be 0 as we haven't registered this student for any courses yet in this test.
+        assertEquals(0, registrations.size());
     }
 
     @Test
     @DisplayName("GET /api/registrations/studentid/{id} - No registration found by student id")
     void getAllRegistrationsByStudentId_shouldReturnNotFound() {
-        // This test is for a non-existent student, but the endpoint itself is protected.
-        // We still need to make the call with an authenticated user.
-        int nonExistentStudentId = -1;
 
-        ResponseEntity<Object> response = authenticatedRestTemplate.getForEntity(
-                "/api/registrations/studentid/" + nonExistentStudentId,
+        //        int nonExistentStudentId = -1;
+
+        ResponseEntity<Object> response = authenticationTemplate.getForEntity(
+                "/api/registrations/studentid/-1",
                 Object.class
         );
 
-        // The service should correctly return a 404 even when called by an authenticated user.
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 }
